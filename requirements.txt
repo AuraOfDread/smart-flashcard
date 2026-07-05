@@ -2,3 +2,5 @@ streamlit
 pypdf
 python-docx
 google-generativeai
+firebase-admin
+requests
