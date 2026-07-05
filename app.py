@@ -67,6 +67,7 @@ api_from_config = ""
 web_api_from_config = ""
 service_account_from_config = None
 
+# HYBRID SECRETS ENGINE: Checks local JSON first, falls back to Cloud Secrets automatically
 if os.path.exists("config.json"):
     try:
         with open("config.json", "r") as f:
@@ -79,7 +80,19 @@ if os.path.exists("config.json"):
                 service_account_from_config["private_key"] = service_account_from_config["private_key"].replace("\\n", "\n")
     except Exception as parse_error:
         st.error(f"Error reading config.json configuration file: {parse_error}")
-
+else:
+    # Streamlit Cloud Secure Vault Fallback
+    try:
+        if "secure_api_key" in st.secrets:
+            api_from_config = st.secrets["secure_api_key"]
+        if "firebase_web_api_key" in st.secrets:
+            web_api_from_config = st.secrets["firebase_web_api_key"]
+        if "firebase_service_account" in st.secrets:
+            service_account_from_config = dict(st.secrets["firebase_service_account"])
+            if "private_key" in service_account_from_config:
+                service_account_from_config["private_key"] = service_account_from_config["private_key"].replace("\\n", "\n")
+    except Exception:
+        pass
 st.sidebar.title("Configuration 🛠️")
 
 if api_from_config:
