@@ -1,1 +1,11 @@
-
+{
+  "secure_api_key": "PASTE_YOUR_API_KEY_HERE",
+  "firebase_web_api_key": "PASTE_YOUR_FIREBASE_WEB_API_KEY_HERE",
+  "firebase_service_account": {
+    "type": "service_account",
+    "project_id": "YOUR_PROJECT_ID",
+    "private_key_id": "YOUR_KEY_ID",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nYOUR_KEY_HERE\n-----END PRIVATE KEY-----\n",
+    "client_email": "YOUR_CLIENT_EMAIL"
+  }
+}
