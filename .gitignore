@@ -1,0 +1,9 @@
+# Hide private key vaults
+config.json
+.streamlit/secrets.toml
+
+# Hide local Python databases & system caches
+*.db
+__pycache__/
+.pytest_cache/
+.DS_Store
