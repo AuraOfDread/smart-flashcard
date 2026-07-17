@@ -168,7 +168,7 @@ def render_teacher_dashboard(db, api_key):
                             
                             st.divider()
                             st.subheader("🔗 Your Shareable Quiz Link")
-                            base_url = "[https://my-smart-flashcards.streamlit.app/](https://my-smart-flashcards.streamlit.app/)"
+                            base_url = "https://my-smart-flashcards.streamlit.app/"
                             share_link = f"{base_url}?quiz={quiz_id}"
                             
                             st.code(share_link, language="text")
