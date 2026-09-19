@@ -144,4 +144,4 @@ else:
         import student_arena
         # Pass the unique URL link if it exists
         current_quiz_link = st.query_params.get("quiz")
-        student_arena.render_student_dashboard(db, st.session_state.user_email, current_quiz_link)
+        student_arena.render_student_dashboard(db, st.session_state.user_email, current_quiz_link)  
