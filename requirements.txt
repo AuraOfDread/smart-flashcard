@@ -1,6 +1,7 @@
 streamlit
-pypdf
+PyPDF2
 python-docx
-google-generativeai
+google-genai
 firebase-admin
 requests
+pandas
