@@ -49,7 +49,7 @@ def render_teacher_dashboard(db, active_api_key):
             "Select Difficulty Level", 
             ["Easy (True/False & Fill-in-Blanks)", "Standard (MCQs)", "Hard (Multi-Select & Spot the Error)"]
         )
-        
+
         def generate_quiz(feedback=""):
             if "Easy" in difficulty:
                 format_rule = "Generate 5 True/False and fill-in-the-blank questions. Format as JSON: [{'question': '...', 'type': 'tf', 'options': ['True', 'False'], 'answer': 'True'}, {'question': '...', 'type': 'fib', 'answer': 'exact word'}]"
@@ -58,14 +58,16 @@ def render_teacher_dashboard(db, active_api_key):
             else:
                 format_rule = "Generate 5 Hard difficulty questions. 3 must be 'multi_select', 2 must be 'spot_error'. Format as JSON: [{'question': '...', 'type': 'multi_select', 'options': ['Exact text 1', 'Exact text 2', 'Exact text 3', 'Exact text 4'], 'answer': ['Exact text 1', 'Exact text 3']}, {'question': '...', 'type': 'spot_error', 'options': ['Para 1 text', 'Para 2 text', 'Para 3 text', 'Para 4 text'], 'answer': 'Para 2 text'}]"
                 
-            # --- THE FIX: Strict rules to force exact string matching ---
             anti_ghosting = "CRITICAL RULES: 1. No image/figure questions. 2. The 'answer' value MUST identically match the exact string inside the 'options' array. DO NOT use letters (like 'A' or 'B') as the answer. DO NOT add prefixes (like 'Paragraph 3:') to the answer string."
             
-            final_prompt = f"You are a strict JSON API. {format_rule} {anti_ghosting} Extract questions based ONLY on this text: {extracted_text}"
-            
+            # --- THE FIX: AI Prompt Hierarchy ---
+            # We put the feedback at the absolute TOP so the AI cannot ignore it
+            instruction_header = "You are a strict JSON API."
             if feedback:
-                final_prompt += f"\n\nTEACHER FEEDBACK TO APPLY: {feedback}"
+                instruction_header += f"\n\n🚨 URGENT TEACHER OVERRIDE: {feedback} 🚨\n(You MUST prioritize this instruction when selecting topics for the questions!)\n"
                 
+            final_prompt = f"{instruction_header}\n\n{format_rule}\n{anti_ghosting}\n\nSOURCE TEXT TO USE:\n{extracted_text}"
+            
             with st.spinner("Gemini is generating questions..."):
                 try:
                     client = genai.Client(api_key=active_api_key)
@@ -141,7 +143,10 @@ def render_teacher_dashboard(db, active_api_key):
                         "teacher_email": st.session_state.user_email # <--- Add this single line!
                     })
                     
-                    base_url = "http://localhost:8501" 
+                    #base_url = "http://localhost:8501" 
+                    #shareable_link = f"{base_url}/?quiz={quiz_id}"
+                    # Use your actual live internet URL!
+                    base_url = "https://my-smart-flashcards.streamlit.app" 
                     shareable_link = f"{base_url}/?quiz={quiz_id}"
                     
                     st.success(f"'{quiz_title}' successfully generated and saved to the database!")
