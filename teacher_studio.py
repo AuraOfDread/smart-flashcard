@@ -68,7 +68,7 @@ def render_teacher_dashboard(db, active_api_key):
                 
             final_prompt = f"{instruction_header}\n\n{format_rule}\n{anti_ghosting}\n\nSOURCE TEXT TO USE:\n{extracted_text}"
             
-            with st.spinner("Gemini is generating questions..."):
+            with st.spinner("Generating questions..."):
                 try:
                     client = genai.Client(api_key=active_api_key)
                     response = client.models.generate_content(
