@@ -44,7 +44,7 @@ def render_teacher_dashboard(db, active_api_key):
         
         # --- NEW: The Quiz Title Input ---
         quiz_title = st.text_input("Enter Quiz Title (e.g., 'Unit 1: Process Scheduling')")
-        
+        #suggestion for ai
         difficulty = st.selectbox(
             "Select Difficulty Level", 
             ["Easy (True/False & Fill-in-Blanks)", "Standard (MCQs)", "Hard (Multi-Select & Spot the Error)"]
@@ -57,8 +57,13 @@ def render_teacher_dashboard(db, active_api_key):
                 format_rule = "Generate 5 standard multiple-choice questions. Format as JSON: [{'question': '...', 'type': 'mcq', 'options': ['Exact text of option 1', 'Exact text of option 2', 'Exact text of option 3', 'Exact text of option 4'], 'answer': 'Exact text of correct option'}]"
             else:
                 format_rule = "Generate 5 Hard difficulty questions. 3 must be 'multi_select', 2 must be 'spot_error'. Format as JSON: [{'question': '...', 'type': 'multi_select', 'options': ['Exact text 1', 'Exact text 2', 'Exact text 3', 'Exact text 4'], 'answer': ['Exact text 1', 'Exact text 3']}, {'question': '...', 'type': 'spot_error', 'options': ['Para 1 text', 'Para 2 text', 'Para 3 text', 'Para 4 text'], 'answer': 'Para 2 text'}]"
-                
-            anti_ghosting = "CRITICAL RULES: 1. No image/figure questions. 2. The 'answer' value MUST identically match the exact string inside the 'options' array. DO NOT use letters (like 'A' or 'B') as the answer. DO NOT add prefixes (like 'Paragraph 3:') to the answer string."
+            
+            anti_ghosting = (
+                "CRITICAL RULES: "
+                "1. No image/figure questions. "
+                "2. The 'answer' value MUST identically match the exact string inside the 'options' array. DO NOT use letters (like 'A' or 'B') as the answer. DO NOT add prefixes to the answer string. "
+                "3. JSON ESCAPING: If any question or option contains programming code, you MUST properly escape all internal double quotes (\\\") and newlines (\\n). Code snippets inside an option must be treated as a single continuous string. Do not break JSON arrays with unescaped commas or raw line breaks."
+            )
             
             # --- THE FIX: AI Prompt Hierarchy ---
             # We put the feedback at the absolute TOP so the AI cannot ignore it
