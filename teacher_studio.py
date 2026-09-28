@@ -144,7 +144,7 @@ def render_teacher_dashboard(db, active_api_key):
                         "teacher_email": st.session_state.user_email
                     })
                     
-                    base_url = "[https://my-smart-flashcards.streamlit.app](https://my-smart-flashcards.streamlit.app)" 
+                    base_url = "https://my-smart-flashcards.streamlit.app" 
                     shareable_link = f"{base_url}/?quiz={quiz_id}"
                     
                     st.success(f"'{quiz_title}' successfully generated and saved to the database!")
