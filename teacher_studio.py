@@ -75,7 +75,7 @@ def render_teacher_dashboard(db, active_api_key):
             
             with st.spinner("Generating questions..."):
                 try:
-                    client = genai.Client(api_key=active_api_key)
+                   client = genai.Client(api_key=active_api_key)
                     response = client.models.generate_content(
                         model='gemini-2.5-flash',
                         contents=final_prompt
