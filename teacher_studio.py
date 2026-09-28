@@ -42,9 +42,8 @@ def render_teacher_dashboard(db, active_api_key):
     if extracted_text:
         st.subheader("2. Configure Quiz")
         
-        # --- NEW: The Quiz Title Input ---
         quiz_title = st.text_input("Enter Quiz Title (e.g., 'Unit 1: Process Scheduling')")
-        #suggestion for ai
+        
         difficulty = st.selectbox(
             "Select Difficulty Level", 
             ["Easy (True/False & Fill-in-Blanks)", "Standard (MCQs)", "Hard (Multi-Select & Spot the Error)"]
@@ -65,8 +64,6 @@ def render_teacher_dashboard(db, active_api_key):
                 "3. JSON ESCAPING: If any question or option contains programming code, you MUST properly escape all internal double quotes (\\\") and newlines (\\n). Code snippets inside an option must be treated as a single continuous string. Do not break JSON arrays with unescaped commas or raw line breaks."
             )
             
-            # --- THE FIX: AI Prompt Hierarchy ---
-            # We put the feedback at the absolute TOP so the AI cannot ignore it
             instruction_header = "You are a strict JSON API."
             if feedback:
                 instruction_header += f"\n\n🚨 URGENT TEACHER OVERRIDE: {feedback} 🚨\n(You MUST prioritize this instruction when selecting topics for the questions!)\n"
@@ -75,9 +72,10 @@ def render_teacher_dashboard(db, active_api_key):
             
             with st.spinner("Generating questions..."):
                 try:
-                   client = genai.Client(api_key=active_api_key)
+                    client = genai.Client(api_key=active_api_key)
+                    # --- FIX APPLIED HERE: Model upgraded to 3.8-flash ---
                     response = client.models.generate_content(
-                        model='gemini-2.5-flash',
+                        model='gemini-3.8-flash',
                         contents=final_prompt
                     )
                     
@@ -99,7 +97,7 @@ def render_teacher_dashboard(db, active_api_key):
         if st.button("Generate First Draft"):
             generate_quiz()
 
-   # ---------------------------------------------------------
+    # ---------------------------------------------------------
     # STEP 3: REVIEW, ITERATE & PUBLISH
     # ---------------------------------------------------------
     if 'draft_quiz' in st.session_state:
@@ -109,8 +107,6 @@ def render_teacher_dashboard(db, active_api_key):
         with st.expander("🛠️ Did AI miss a topic? Coach the AI to regenerate."):
             teacher_feedback = st.text_input("Type your instructions (e.g., 'Make sure to include a question about deadlocks'):")
             if st.button("Regenerate with Feedback"):
-                # We removed st.rerun() here! Now the success message will stay visible 
-                # and the UI won't aggressively flash and close your expander box!
                 generate_quiz(feedback=teacher_feedback)
         
         st.write("### Current Draft Questions:")
@@ -145,13 +141,10 @@ def render_teacher_dashboard(db, active_api_key):
                         "title": quiz_title, 
                         "difficulty": difficulty,
                         "questions": approved_questions,
-                        "teacher_email": st.session_state.user_email # <--- Add this single line!
+                        "teacher_email": st.session_state.user_email
                     })
                     
-                    #base_url = "http://localhost:8501" 
-                    #shareable_link = f"{base_url}/?quiz={quiz_id}"
-                    # Use your actual live internet URL!
-                    base_url = "https://my-smart-flashcards.streamlit.app" 
+                    base_url = "[https://my-smart-flashcards.streamlit.app](https://my-smart-flashcards.streamlit.app)" 
                     shareable_link = f"{base_url}/?quiz={quiz_id}"
                     
                     st.success(f"'{quiz_title}' successfully generated and saved to the database!")
@@ -171,18 +164,15 @@ def render_teacher_dashboard(db, active_api_key):
     if st.button("Load / Refresh Analytics Database"):
         with st.spinner("Fetching data from Firestore..."):
             try:
-                # --- FIREWALL STEP 1: Find only the quizzes created by THIS teacher ---
                 my_quizzes_ref = db.collection("quizzes").where("teacher_email", "==", st.session_state.user_email).stream()
                 my_quiz_ids = [doc.id for doc in my_quizzes_ref]
                 
-                # --- FIREWALL STEP 2: Fetch scores and filter out other teachers' data ---
                 scores_ref = db.collection("scores").stream()
                 score_data = []
                 
                 for doc in scores_ref:
                     data = doc.to_dict()
                     
-                    # Only add the score to the table if the quiz belongs to this teacher!
                     if data.get("quiz_id") in my_quiz_ids:
                         
                         raw_score = data.get("score", 0)
